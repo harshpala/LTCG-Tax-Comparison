@@ -1,9 +1,15 @@
-#include<bits/stdc++.h>
+#include<iostream>
+#include<string>
+#include<fstream>
+#include<sstream>
+#include<cmath>
+
+
 using namespace std;
 
 // since the data is from year 2001 to 2029 or simply considering from row 2 to 30
 const int MAX_YEARS = 29;
-const string csvPath = "./A1_data/price-inflation.csv";
+const string csvPath = "./data/price-inflation.csv";
 
 
 // Class to model inflation rate
@@ -75,24 +81,24 @@ void read_record(int maxRecords, InflationRate inflationRates[], PropertyGrowthR
 
 bool validateYears(int purchaseYear, int sellingYear) {
 
-    if (!purchaseYear)
+    if (!sellingYear)
     {
         cerr<<"Please Enter year in digits, eg: 2002"<<endl;
         return false;
     }
     
-    if (purchaseYear < 2001) {
-        cerr << "Purchase Year cannot be before 2001" << endl;
-        return false;
-    }
+    // if (purchaseYear < 2001) {
+    //     cerr << "Purchase Year cannot be before 2001" << endl;
+    //     return false;
+    // }
 
-    else if (purchaseYear > 2028) {
-        cerr << "Purchase Year cannot be after 2028" << endl;
-        return false;
-    }
+    // else if (purchaseYear > 2028) {
+    //     cerr << "Purchase Year cannot be after 2028" << endl;
+    //     return false;
+    // }
 
     else if (sellingYear < 2002) {
-        cerr << "Selling must be minimun 2002" << endl;
+        cerr << "Selling must be minimun 2024" << endl;
         return false;
     }
 
@@ -117,30 +123,33 @@ double cumulativeGrowthInflationCalculator(int purchaseYear, int sellingYear,
     double cumulativeResult = 1.0;
     cumulativeInflation = 1.0;
 
-    // Loop from purchase year to selling year
-    for (int year = purchaseYear ; year < sellingYear; ++year) {
-        int index = year - 2001;  // Assuming the data starts at year 2001
+    for (int year = purchaseYear ; year < sellingYear; ++year) {            // Loop from purchase year to selling year
+        int index = year - 2001;                                            // Assuming the data starts at year 2001
 
-        // Calculate the adjusted rate (Gi - Ii)
-        double growthRate = growthRates[index].getRate();
+        double growthRate = growthRates[index].getRate();                   // Calculate the adjusted rate (Gi - Ii)
         double inflationRate = inflationRates[index].getRate();
 
-        // Apply the formula for growth-inflation adjusted rate
-        cumulativeResult *= (1 + (growthRate - inflationRate) / 100.0);
+        cumulativeResult *= (1 + (growthRate - inflationRate) / 100.0);     // Apply the formula for growth-inflation adjusted rate
         cumulativeInflation *= (1 + inflationRate / 100.0);
     }
 
-    cumulativeResult -= 1;  // Convert back to percentage
-    cumulativeInflation -= 1;  // Convert back to percentage for inflation
+    cumulativeResult -= 1;                                                  // Convert back to percentage
+    cumulativeInflation -= 1;                                               // Convert back to percentage for inflation
 
     return cumulativeResult;
 }
 
-int calculateLTCG(double sellingPrice, double costPrice, double cumulativeInflation) {
+double calculateLTCG(double sellingPrice, double costPrice, double cumulativeInflation) {
     double rawProfit = sellingPrice - costPrice;
-    double inflationAdjustedProfit = rawProfit / (1 + cumulativeInflation);  // Adjusting the profit with inflation
-    double LTCGTax = 0.20 * inflationAdjustedProfit;  // 20% tax on the inflation-adjusted profit
-    return round(LTCGTax);                              // Returning after Rounding the LTCGTax
+    double LTCGTax = 0;
+    if (!(rawProfit<0))
+    {
+        double inflationAdjustedProfit = rawProfit / (1 + cumulativeInflation);  // Adjusting the profit with inflation
+        LTCGTax = 0.20 * inflationAdjustedProfit;                                // 20% tax on the inflation-adjusted profit
+    }
+    
+ 
+    return LTCGTax;                                                   // Returning after Rounding the LTCGTax
 }
 
 
@@ -153,15 +162,20 @@ int main(){
     read_record(MAX_YEARS, inflationRates, growthRates);        
 
     // Get user inputs
-    int purchaseYear, sellingYear;                              
-    double costPrice;
+    int purchaseYear = 2010;
+    int sellingYear;                              
+    double costPrice = 5000000;
 
-    cout << "Enter the purchase year: ";
-    cin >> purchaseYear;
+
+    // cout << "Enter the purchase year: ";
+    // cin >> purchaseYear;
+
     cout << "Enter the selling year: ";
     cin >> sellingYear;
-    cout << "Enter the cost price (in Rs): ";
-    cin >> costPrice;
+
+    // cout << "Enter the cost price (in Rs): ";
+    // cin >> costPrice;
+
     cout << endl;
 
    if (!validateYears(purchaseYear, sellingYear)) {
@@ -178,8 +192,8 @@ int main(){
     int estimatedSellingPrice = round(costPrice * (1 + cumulativeResult));              // Rounding the estimated selling price
     cout << "Estimated Selling Price: Rs " << estimatedSellingPrice << endl;
 
-    int LTCGTax = calculateLTCG(estimatedSellingPrice, costPrice, cumulativeInflation);
-    LTCGTax =  (LTCGTax < 0) ? 0 : LTCGTax;
+    int LTCGTax = round(calculateLTCG(estimatedSellingPrice, costPrice, cumulativeInflation));
+    //LTCGTax =  (LTCGTax < 0) ? 0 : LTCGTax;
     cout << "LTCG Tax to be paid: Rs " <<LTCGTax << endl;
 
     
