@@ -162,9 +162,9 @@ int main(){
     read_record(MAX_YEARS, inflationRates, growthRates);        
 
     // Get user inputs
-    int purchaseYear = 2010;
+    int purchaseYear = 2004;
     int sellingYear;                              
-    double costPrice = 5000000;
+    double costPrice = 389544576;
 
 
     // cout << "Enter the purchase year: ";
