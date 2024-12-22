@@ -139,19 +139,27 @@ double cumulativeGrowthInflationCalculator(int purchaseYear, int sellingYear,
     return cumulativeResult;
 }
 
-double calculateLTCG(double sellingPrice, double costPrice, double cumulativeInflation) {
-    double rawProfit = sellingPrice - costPrice;
+double calculateOldLTCG(double sellingPrice, double costPrice, double cumulativeInflation) {
+   double rawProfit = sellingPrice - costPrice;
     double LTCGTax = 0;
     if (!(rawProfit<0))
     {
         double inflationAdjustedProfit = rawProfit / (1 + cumulativeInflation);  // Adjusting the profit with inflation
         LTCGTax = 0.20 * inflationAdjustedProfit;                                // 20% tax on the inflation-adjusted profit
     }
-    
- 
-    return LTCGTax;                                                   // Returning after Rounding the LTCGTax
+    return LTCGTax;                                                          
 }
 
+// LTCG calculation under new scheme (no inflation adjustment, 12.5% tax)
+double calculateLTCGNewScheme(double sellingPrice, double costPrice) {
+    double rawProfit = sellingPrice - costPrice;
+    double LTCGTax = 0;
+    if (!(rawProfit<0))
+    {
+    LTCGTax = 0.125 * rawProfit;
+    }
+    return LTCGTax;
+}
 
 int main(){
 
@@ -162,9 +170,9 @@ int main(){
     read_record(MAX_YEARS, inflationRates, growthRates);        
 
     // Get user inputs
-    int purchaseYear = 2004;
+    int purchaseYear = 2010;
     int sellingYear;                              
-    double costPrice = 389544576;
+    double costPrice = 5000000;
 
 
     // cout << "Enter the purchase year: ";
@@ -192,9 +200,13 @@ int main(){
     int estimatedSellingPrice = round(costPrice * (1 + cumulativeResult));              // Rounding the estimated selling price
     cout << "Estimated Selling Price: Rs " << estimatedSellingPrice << endl;
 
-    int LTCGTax = round(calculateLTCG(estimatedSellingPrice, costPrice, cumulativeInflation));
-    //LTCGTax =  (LTCGTax < 0) ? 0 : LTCGTax;
-    cout << "LTCG Tax to be paid: Rs " <<LTCGTax << endl;
+    int LTCGOld = round(calculateOldLTCG(estimatedSellingPrice, costPrice, cumulativeInflation));    // Rounding the oldLTCGTax
+
+    int LTCGNew = round(calculateLTCGNewScheme(estimatedSellingPrice, costPrice));                      // Rounding the newLTCGTax
+
+    cout << "LTCG Tax under New Scheme: Rs " << LTCGNew << endl;
+    cout << "Old LTCG Tax to be paid: Rs " <<LTCGOld << endl;
+    cout << "Difference in LTCG Tax: Rs " << abs(LTCGOld - LTCGNew) << endl;
 
     
 }
